@@ -1,0 +1,22 @@
+{
+    "name": "stg/ieu_http",
+    "description": "ieUtilities - Hydrator",
+    "type": "",
+    "license": "MIT",
+    "version": "1.0",
+    "authors": [
+        {
+            "name": "Philipp Steingrebe",
+            "email": "philipp@steingrebe.de"
+        }
+    ],
+    "autoload": {
+        "psr-0" : {
+            "ieu\\" : "src/"
+        }
+    },
+
+    "depdencies" : {
+        "stg/ieu_types": "dev"
+    }
+}
