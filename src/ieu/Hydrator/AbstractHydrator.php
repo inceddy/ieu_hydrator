@@ -7,13 +7,10 @@ use ieu\Hydrator\Context\HydrationContext;
 use ieu\Hydrator\Types\TypeInterface;
 use ieu\Hydrator\NamingStrategies\NamingStrategyInterface;
 
-/**
- * This abstract hydrator provides a built-in support for filters and strategies. All
- * standards ZF3 hydrators extend this class
- */
+
 abstract class AbstractHydrator implements HydratorInterface
 {
-    protected $properties = [];
+    protected $types = [];
 
     protected $namingStrategy = null;
 
@@ -48,34 +45,40 @@ abstract class AbstractHydrator implements HydratorInterface
         return $this->namingStrategy;
     }
 
-    public function setProperty($name, TypeInterface $type = null)
+    public function setType($name, TypeInterface $type = null)
     {
-        $this->properties[$name] = $type;
+        $this->types[$name] = $type;
 
         return $this;
     }
 
-    public function getProperty($name)
+    public function getType($property)
     {
-        if (!array_key_exists($name, $this->properties)) {
-            throw new \InvalidArgumentException(sprintf('Property \'%s\' is not set.', $name));
-        }
-
-        return $this->properties[$name];
+        return isset($this->types[$property]) ? $this->types[$property] : null;
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
+    
     public function extractValue($name, $value, ExtractionContext $context = null)
     {
-        if (null !== $type = $this->getProperty($name)) {
+        if (null !== $type = $this->getType($name)) {
             return $type->getExtractionValue($value, $context);
         }
 
         return $value;
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
+
     public function hydrateValue($name, $value, HydrationContext $context = null)
     {
-        if (null !== $type = $this->getProperty($name)) {
+        if (null !== $type = $this->getType($name)) {
             return $type->getHydrationValue($value, $context);
         }
 

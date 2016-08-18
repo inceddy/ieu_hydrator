@@ -12,18 +12,18 @@ final class ClosureHydrator extends AbstractHydrator
 
     public function __construct()
     {
-        $this->doExtract = function($object, $property){
+        $this->doExtract = function($object){
             static $context = [];
 
             $class = get_class($object);
 
             if (!isset($context[$class])) {
-                $context[$class] = \Closure::bind(function($object, $property) {
-                    return isset($object->$property) ? $object->$property : null;
+                $context[$class] = \Closure::bind(function($object) {
+                    return get_object_vars($object);
                 }, null, $class);
             }
 
-            return $context[$class]($object, $property);
+            return $context[$class]($object);
         };
 
         $this->doHydrate = function($object, $property, $value){
@@ -51,19 +51,13 @@ final class ClosureHydrator extends AbstractHydrator
     {
         $doExtract = $this->doExtract;
 
-        $context = clone $this->extractionContext; // Performance trick, do not try to instantiate
+        $context = clone $this->extractionContext;
         $context->object = $object;
 
         $data = [];
-        
-        foreach ($this->properties as $propertyName => $type) {
 
-            $value = $this->extractValue(
-                $propertyName,
-                $doExtract($object, $propertyName),
-                $context
-            );
-
+        foreach($doExtract($object) as $propertyName => $value) {
+            $value = $this->extractValue($propertyName, $value, $context);
             $propertyName = $this->namingStrategy ? $this->namingStrategy->getNameForExtraction($propertyName, $context) : $propertyName;
 
             $data[$propertyName] = $value;
@@ -89,11 +83,7 @@ final class ClosureHydrator extends AbstractHydrator
 
             $propertyName = $this->namingStrategy ? $this->namingStrategy->getNameForHydration($propertyName, $context) : $propertyName;
 
-            $doHydrate($object, $propertyName, $this->hydrateValue(
-                $propertyName,
-                $value,
-                $context
-            ));
+            $doHydrate($object, $propertyName, $this->hydrateValue($propertyName, $value, $context));
         }
 
         return $object;

@@ -17,9 +17,7 @@ class ClosureHydratorTest extends \PHPUnit_Framework_TestCase {
 	{
 		$this->namingStrategy = new UnderscoreNamingStrategy();
 		$this->hydrator = (new ClosureHydrator($this->namingStrategy))
-			->setProperty('id')
-			->setProperty('name')
-			->setProperty('tags', ArrayType::instance());
+			->setType('tags', ArrayType::instance());
 	}
 
 	public function testUnderscoreNamingStrategy()
@@ -51,7 +49,7 @@ class ClosureHydratorTest extends \PHPUnit_Framework_TestCase {
 		$e = new EntityType;
 
 		$hydrator = (new ClosureHydrator($this->namingStrategy))
-			->setProperty('type', ArrayType::instance());
+			->setType('type', ArrayType::instance());
 
 		$hydrator->hydrate($e, ['type' => '["A", "B", "C"]']);
 
@@ -59,7 +57,7 @@ class ClosureHydratorTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('["A","B","C"]' , $hydrator->extract($e)['type']);
 
 		$hydrator
-			->setProperty('type', IntegerType::instance())
+			->setType('type', IntegerType::instance())
 			->hydrate($e, ['type' => '1']);
 
 		$this->assertEquals(1 , $e->getType());
