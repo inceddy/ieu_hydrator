@@ -2,7 +2,7 @@
 
 class EntityType {
 
-	private $type;
+	protected $type;
 
 	public function getType()
 	{

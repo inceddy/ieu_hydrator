@@ -12,7 +12,7 @@ class DateTimeType extends AbstractType {
 
 	public function getHydrationValue($value, HydrationContext $context)
 	{
-		return (new \DataTime())->setTimestamp($value);
+		return (new \DateTime())->setTimestamp($value);
 	}
 
 
@@ -20,7 +20,7 @@ class DateTimeType extends AbstractType {
 	 * {@inheritDoc}
 	 */
 
-	public function getExtractionValue(\DateTime $value, ExtractionContext $context)
+	public function getExtractionValue($value, ExtractionContext $context)
 	{
 		return $value->getTimestamp();
 	}
