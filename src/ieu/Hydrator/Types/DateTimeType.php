@@ -12,7 +12,7 @@ class DateTimeType extends AbstractType {
 
 	public function getHydrationValue($value, HydrationContext $context)
 	{
-		return (new \DateTime())->setTimestamp($value);
+		return !!$value ? (new \DateTime())->setTimestamp($value) : null;
 	}
 
 
@@ -22,6 +22,6 @@ class DateTimeType extends AbstractType {
 
 	public function getExtractionValue($value, ExtractionContext $context)
 	{
-		return $value->getTimestamp();
+		return !!$value ? $value->getTimestamp() : null;
 	}
 }
