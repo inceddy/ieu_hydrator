@@ -34,6 +34,17 @@ class TypeTest extends \PHPUnit_Framework_TestCase {
 		$data = $this->hydrator->extract($object);
 		$this->assertEquals($time, $data['type']);
 
+		// Null/Empty values
+		$this->hydrator->hydrate($object, ['type' => null]);
+		$this->assertEquals(null, $object->getType());
+
+		$this->hydrator->hydrate($object, ['type' => '']);
+		$this->assertEquals(null, $object->getType());
+
+		$object->setType(null);
+		$data = $this->hydrator->extract($object);
+		$this->assertEquals(null, $data['type']);
+
 		unset($object);
 	}
 

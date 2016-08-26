@@ -10,7 +10,7 @@ final class ClosureHydrator extends AbstractHydrator
 
     private $doHydrate;
 
-    public function __construct()
+    public function __construct(NamingStrategyInterface $namingStrategy = null)
     {
         $this->doExtract = function($object){
             static $context = [];
@@ -40,7 +40,7 @@ final class ClosureHydrator extends AbstractHydrator
             return $context[$class]($object, $property, $value);
         };
 
-        parent::__construct();
+        parent::__construct($namingStrategy);
     }
 
     /**
@@ -57,10 +57,11 @@ final class ClosureHydrator extends AbstractHydrator
         $data = [];
 
         foreach($doExtract($object) as $propertyName => $value) {
-            $value = $this->extractValue($propertyName, $value, $context);
-            $propertyName = $this->namingStrategy ? $this->namingStrategy->getNameForExtraction($propertyName, $context) : $propertyName;
+            // Transform e.g. `camelCaseProperty` to `camel_case_property`
+            $propertyNameExt = $this->namingStrategy ? $this->namingStrategy->getNameForExtraction($propertyName, $context) : $propertyName;
 
-            $data[$propertyName] = $value;
+            $value = $this->extractValue($propertyName, $value, $context);
+            $data[$propertyNameExt] = $value;
         }
 
         return $data;
@@ -80,9 +81,8 @@ final class ClosureHydrator extends AbstractHydrator
         $context->data   = $data;
         
         foreach ($data as $propertyName => $value) {
-
+            // Transform e.g. `camel_case_property` to `camelCaseProperty`
             $propertyName = $this->namingStrategy ? $this->namingStrategy->getNameForHydration($propertyName, $context) : $propertyName;
-
             $doHydrate($object, $propertyName, $this->hydrateValue($propertyName, $value, $context));
         }
 

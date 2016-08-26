@@ -21,5 +21,20 @@ interface TypeInterface {
 
 	public function getHydrationValue($value, HydrationContext $context);
 
+
+	/**
+	 * Transforms the entity value to the
+	 * raw/encoded value to store in the
+	 * database.
+	 *
+	 * @param  mixed $value
+	 *    The entity value to encode
+	 * @param  ExtractionContext $context
+	 *    The context of extraction
+	 *
+	 * @return mixed
+	 *    The raw/encoded value
+	 */
+	
 	public function getExtractionValue($value, ExtractionContext $context);
 }

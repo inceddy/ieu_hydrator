@@ -27,8 +27,10 @@ abstract class AbstractHydrator implements HydratorInterface
     /**
      * Constructor
      */
-    public function __construct()
+    public function __construct(NamingStrategyInterface $namingStrategy = null)
     {
+        $this->namingStrategy = $namingStrategy;
+        
         $this->extractionContext = new ExtractionContext();
         $this->hydrationContext  = new HydrationContext();
     }

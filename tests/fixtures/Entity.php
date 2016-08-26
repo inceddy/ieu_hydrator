@@ -5,6 +5,7 @@ class Entity {
 	private $id;
 	private $name;
 	private $tags;
+	private $camelCase;
 
 	public function getId()
 	{
@@ -19,5 +20,10 @@ class Entity {
 	public function getTags()
 	{
 		return $this->tags;
+	}
+
+	public function getCamelCase()
+	{
+		return $this->camelCase;
 	}
 }
