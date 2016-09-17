@@ -5,6 +5,7 @@ use ieu\Hydrator\NamingStrategies\UnderscoreNamingStrategy;
 use ieu\Hydrator\Types\ArrayType;
 use ieu\Hydrator\Types\IntegerType;
 use ieu\Hydrator\Types\DateTimeType;
+use ieu\Hydrator\Types\ClosureType;
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR . 'EntityType.php';
 
@@ -63,6 +64,28 @@ class TypeTest extends \PHPUnit_Framework_TestCase {
 		// Extraction
 		$data = $this->hydrator->extract($object);
 		$this->assertEquals($arrayEncoded, $data['type']);
+
+		unset($object);
+	}
+
+	public function testClosureType()
+	{
+		$object = new EntityType;
+		$dataOrg = ['type' => 1];
+
+		$this->hydrator->setType('type', new ClosureType(function($value){
+			return $value * 2;
+		}, function($value){
+			return $value / 2;
+		}));
+
+		// Hydration
+		$this->hydrator->hydrate($object, $dataOrg);
+		$this->assertEquals(2, $object->getType());
+
+		// Extraction
+		$data = $this->hydrator->extract($object);
+		$this->assertEquals($dataOrg, $data);
 
 		unset($object);
 	}

@@ -1,5 +1,7 @@
 <?php
 namespace ieu\Hydrator;
+use ieu\Hydrator\Collections\PropertyCollection;
+use ieu\Hydrator\Collections\ColumnCollection;
 use ieu\Hydrator\NamingStrategies\NamingStrategyInterface;
 
 final class ClosureHydrator extends AbstractHydrator
@@ -51,17 +53,33 @@ final class ClosureHydrator extends AbstractHydrator
     {
         $doExtract = $this->doExtract;
 
+        // Get all properties from the object
+        $dataRaw = $doExtract($object);
+        // Group data
+        $dataGrouped = $this->groupForExtraction($dataRaw);
+
         $context = clone $this->extractionContext;
         $context->object = $object;
+        $context->raw = $dataRaw;
 
         $data = [];
 
-        foreach($doExtract($object) as $propertyName => $value) {
-            // Transform e.g. `camelCaseProperty` to `camel_case_property`
-            $propertyNameExt = $this->namingStrategy ? $this->namingStrategy->getNameForExtraction($propertyName, $context) : $propertyName;
-
+        foreach($dataGrouped as $propertyName => $value) {
             $value = $this->extractValue($propertyName, $value, $context);
-            $data[$propertyNameExt] = $value;
+
+            // Ungoup column collections
+            if ($value instanceof ColumnCollection) {
+                $value->setNamingStrategy($this->namingStrategy);
+                // Property name to column name trnasformation happens inside the column collection.
+                foreach ($value as $columnName => $value) {
+                    $data[$columnName] = $value;
+                }
+            }
+
+            else {
+                $columnName = $this->namingStrategy->getNameForExtraction($propertyName, $context);
+                $data[$columnName] = $value;
+            }
         }
 
         return $data;
@@ -79,11 +97,26 @@ final class ClosureHydrator extends AbstractHydrator
         $context = clone $this->hydrationContext; // Performance trick, do not try to instantiate
         $context->object = $object;
         $context->data   = $data;
-        
-        foreach ($data as $propertyName => $value) {
+
+        $dataGrouped = $this->groupForHydration($data);
+
+        foreach ($dataGrouped as $columnName => $value) {
             // Transform e.g. `camel_case_property` to `camelCaseProperty`
-            $propertyName = $this->namingStrategy ? $this->namingStrategy->getNameForHydration($propertyName, $context) : $propertyName;
-            $doHydrate($object, $propertyName, $this->hydrateValue($propertyName, $value, $context));
+            $propertyName = $this->namingStrategy->getNameForHydration($columnName, $context);
+            $value = $this->hydrateValue($propertyName, $value, $context);
+
+            // Ungroup property collection
+            if ($value instanceof PropertyCollection) {
+                $value->setNamingStrategy($this->namingStrategy);
+                // Column name to property name trnasformation happens inside the column collection.
+                foreach ($value as $propertyName => $value) {
+                    $doHydrate($object, $propertyName, $value);
+                }
+            }
+            else {
+                $doHydrate($object, $propertyName, $value);
+            }
+
         }
 
         return $object;

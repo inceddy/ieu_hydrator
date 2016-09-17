@@ -6,6 +6,7 @@ use ieu\Hydrator\Context\HydrationContext;
 
 interface NamingStrategyInterface
 {
+ 
     /**
      * Get the name to use for extraction
      *
@@ -14,6 +15,8 @@ interface NamingStrategyInterface
      * @return string
      */
     public function getNameForExtraction($name, ExtractionContext $context = null);
+ 
+
     /**
      * Get the name to use for hydration
      *
@@ -22,4 +25,32 @@ interface NamingStrategyInterface
      * @return string
      */
     public function getNameForHydration($name, HydrationContext $context = null);
+
+
+    /**
+     * Concats multiple names conforming 
+     * the naming strategy for extraction.
+     *
+     * @param  array $pieces 
+     *    The names to concat
+     *
+     * @return string
+     *    The concated names
+     */
+    
+    public function concatNamesForExtraction(... $names);
+
+
+    /**
+     * Concats multiple names conforming 
+     * the naming strategy for hydration.
+     *
+     * @param  array $pieces 
+     *    The names to concat
+     *
+     * @return string
+     *    The concated names
+     */
+
+    public function concatNamesForHydration(... $names);
 }

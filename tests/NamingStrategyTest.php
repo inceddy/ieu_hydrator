@@ -13,14 +13,17 @@ class NamingStrategyTest extends \PHPUnit_Framework_TestCase {
 	public function setUp()
 	{
 		$this->namingStrategy = new UnderscoreNamingStrategy();
-		$this->hydrator = new ClosureHydrator($this->namingStrategy);
 	}
 
 	public function testUnderscoreNamingStrategy()
 	{
-		$object = new Entity;
-		$data = $this->hydrator->extract($object);
-		$this->assertEquals(['id', 'name', 'tags', 'camel_case'], array_keys($data));
+		// Name trnasformation
+		$this->assertEquals('camel_case', $this->namingStrategy->getNameForExtraction('camelCase'));
+		$this->assertEquals('camelCase', $this->namingStrategy->getNameForHydration('camel_case'));
 
+		// Name concatination
+		$this->assertEquals('camelCaseSubNameSubName', $this->namingStrategy->concatNamesForExtraction('camelCase', 'subName', 'subName'));
+		$this->assertEquals('camel_case_sub_name_sub_name', $this->namingStrategy->concatNamesForHydration('camel_case', 'sub_name', 'sub_name'));
 	}
+
 }
