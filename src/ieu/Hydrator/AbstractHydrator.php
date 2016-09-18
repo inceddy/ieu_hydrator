@@ -205,7 +205,6 @@ abstract class AbstractHydrator implements HydratorInterface
                 
                 if ($group->hasGlobalName($globalName)) {
                     $dataGroup[$group->getLocalName($globalName)] = $value;
-
                 }
                 else {
                     $dataRest[$globalName] = $value;
@@ -223,7 +222,7 @@ abstract class AbstractHydrator implements HydratorInterface
     }
 
     /**
-     * 
+     * $data will be something like ['created_at_time_stamp' => 123, 'created_at_time_zone' => 'Western/Berlin']
      *
      * @param  array  $data [description]
      *
@@ -245,16 +244,15 @@ abstract class AbstractHydrator implements HydratorInterface
         }
 
         foreach($groups as $groupName => $group) {
-            $columnGroupName = $this->namingStrategy->getNameForExtraction($groupName);
             $collection->setName($groupName);
 
             $dataGroup = $dataRest = [];
 
             foreach ($data as $columnName => $value) {
-                $globalName = $this->namingStrategy->getNameForHydration($columnName);
+                $globalPropertyName = $this->namingStrategy->getNameForHydration($columnName);
 
-                if ($group->hasGlobalName($globalName)) {
-                    $dataGroup[$group->getLocalName($globalName)] = $value;
+                if ($group->hasGlobalName($globalPropertyName)) {
+                    $dataGroup[$group->getLocalName($globalPropertyName)] = $value;
                 }
                 else {
                     $dataRest[$columnName] = $value;
@@ -265,6 +263,7 @@ abstract class AbstractHydrator implements HydratorInterface
             $collection->exchangeArray($dataGroup);
             
             $data = $dataRest;
+            $columnGroupName = $this->namingStrategy->getNameForExtraction($groupName);
             $data[$columnGroupName] = $collection;
         }
 

@@ -69,6 +69,7 @@ final class ClosureHydrator extends AbstractHydrator
 
             // Ungoup column collections
             if ($value instanceof ColumnCollection) {
+                $value->setName($propertyName);
                 $value->setNamingStrategy($this->namingStrategy);
                 // Property name to column name trnasformation happens inside the column collection.
                 foreach ($value as $columnName => $value) {

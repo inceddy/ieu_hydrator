@@ -30,7 +30,7 @@ final class UnderscoreNamingStrategy implements NamingStrategyInterface
      * {@inheritDoc}
      */
     
-    public function concatNamesForExtraction(... $names)
+    public function concatPropertyNames(... $names)
     {
         return array_shift($names) . implode('', array_map('ucfirst', $names));
     }
@@ -40,7 +40,7 @@ final class UnderscoreNamingStrategy implements NamingStrategyInterface
      * {@inheritDoc}
      */
 
-    public function concatNamesForHydration(... $names)
+    public function concatColumnNames(... $names)
     {
         return implode('_', $names);
     }

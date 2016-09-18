@@ -37,15 +37,25 @@ class CollectionTest extends \PHPUnit_Framework_TestCase {
 
 	public function testColumnCollection()
 	{
+		// Without naming prefix
 		$collection = new ieu\Hydrator\Collections\ColumnCollection(['timeZone' => 'Western\Berlin'], $this->namingStrategy);
 		$iteratorArray = $collection->getIterator()->getArrayCopy();
-		$this->assertArrayHasKey('timeZone', $iteratorArray);
+		$this->assertArrayHasKey('time_zone', $iteratorArray);
+
+
+		// With naming prefix
+		$collection = new ieu\Hydrator\Collections\ColumnCollection(['.timeZone' => 'Western\Berlin'], $this->namingStrategy);
+		$collection->setName('prefixName');
+		$iteratorArray = $collection->getIterator()->getArrayCopy();
+		$this->assertArrayHasKey('prefix_name_time_zone', $iteratorArray);
 	}
+
 
 	public function testPropertyCollection()
 	{
 		$collection = new ieu\Hydrator\Collections\PropertyCollection(['timeZone' => 'Western\Berlin'], $this->namingStrategy);
 		$iteratorArray = $collection->getIterator()->getArrayCopy();
-		$this->assertArrayHasKey('time_zone', $iteratorArray);
+		var_dump($iteratorArray);
+		$this->assertArrayHasKey('timeZone', $iteratorArray);
 	}
 }

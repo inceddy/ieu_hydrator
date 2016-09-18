@@ -38,7 +38,7 @@ interface NamingStrategyInterface
      *    The concated names
      */
     
-    public function concatNamesForExtraction(... $names);
+    public function concatColumnNames(... $names);
 
 
     /**
@@ -52,5 +52,5 @@ interface NamingStrategyInterface
      *    The concated names
      */
 
-    public function concatNamesForHydration(... $names);
+    public function concatPropertyNames(... $names);
 }

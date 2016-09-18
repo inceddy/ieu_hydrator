@@ -1,6 +1,7 @@
 <?php
 
 use ieu\Hydrator\ClosureHydrator;
+use ieu\Hydrator\Group;
 use ieu\Hydrator\NamingStrategies\UnderscoreNamingStrategy;
 use ieu\Hydrator\Types\ArrayType;
 use ieu\Hydrator\Types\IntegerType;
@@ -92,5 +93,19 @@ class ClosureHydratorTest extends \PHPUnit_Framework_TestCase {
 
 		$this->assertTrue($data['prop1'] === 1);
 		$this->assertTrue($data['prop2'] === 2);
+	}
+
+	public function testUnpackingOnExtractionWithNamePrefix()
+	{
+		$hydrator = (new ClosureHydrator($this->namingStrategy))
+			->setType('typeCase', new ClosureType(function($value){},
+			function($value){
+				return new ColumnCollection(['.prop1Case' => 1, '.prop2Case' => 2]);
+			}));
+
+		$data = $hydrator->extract ((object)['typeCase' => null]);
+
+		$this->assertTrue($data['type_case_prop1_case'] === 1);
+		$this->assertTrue($data['type_case_prop2_case'] === 2);
 	}
 }

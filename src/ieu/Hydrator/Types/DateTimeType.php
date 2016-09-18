@@ -15,12 +15,10 @@ class DateTimeType extends AbstractType {
 
 	public function getHydrationValue($value, HydrationContext $context)
 	{
-		if (!$value['']) {
+		if (!$value) {
 			return null;
 		}
 
-		$date = new \DateTime($value);
-		$date->setTimeZone(new \DateTimeZone(timezone))
 		return !!$value ? (new \DateTime())->setTimestamp($value) : null;
 	}
 
@@ -34,9 +32,8 @@ class DateTimeType extends AbstractType {
 		if (!$value) {
 			return null;
 		}
-		return !!$value ? 
-			new ColumnCollection([$value->getTimestamp(), $value->getTimeZone()->getName()]) : 
-			null;
+		
+		return !!$value ? $value->getTimestamp() : null;
 	}
 
 	public function getGroupInstructions()

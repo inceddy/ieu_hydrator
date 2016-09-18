@@ -31,6 +31,7 @@ class GroupTest extends \PHPUnit_Framework_TestCase {
 
 		$this->assertInstanceOf(ColumnCollection::CLASS, $object->createdAt);
 
+
 		$this->assertEquals(123456,       $object->createdAt->timeStamp);
 		$this->assertEquals('US/Pacific', $object->createdAt->timeZone);
 	}

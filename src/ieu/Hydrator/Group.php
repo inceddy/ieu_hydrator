@@ -23,7 +23,7 @@ class Group {
 		$this->map = [];
 		foreach ($names as $name) {
 			if (is_array($name)) {
-				$this->map[$name[1]] = $nameingStrategy->concatNamesForExtraction(...$name);
+				$this->map[$name[1]] = $nameingStrategy->concatPropertyNames(...$name);
 			}
 			else {
 				$this->map[$name] = $name;
