@@ -19,6 +19,24 @@ abstract class AbstractType implements TypeInterface {
 	
 	abstract public function getExtractionValue($value, ExtractionContext $context);
 
+	/**
+	 * Returns a group definiton for this type
+	 * or `NULL` if this type does not group anything or 
+	 * will be manualy grouped.
+	 *
+	 * @return array
+	 */
+	
+	public function getGroupDefinition()
+	{
+		/**
+		 * Example:
+		 * return [['.lat', '.lng'], ieu\Hydrator\Group::HYDRATION];
+		 */
+		
+		return null;
+	}
+
 
 	/**
 	 * Factory method for use as singleton
