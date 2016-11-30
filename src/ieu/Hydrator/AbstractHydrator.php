@@ -72,6 +72,21 @@ abstract class AbstractHydrator implements HydratorInterface
     public function setType($name, TypeInterface $type = null)
     {
         $this->types[$name] = $type;
+
+        // Auto group
+        if (null !== $groupDefinition = $type->getGroupDefinition()) {
+            $this->setGroup($name, $groupDefinition[0], $groupDefinition[1]);
+        }
+
+        return $this;
+    }
+
+    public function setTypes(array $types)
+    {
+        foreach ($types as $name => $type) {
+            $this->setType($name, $type);
+        }
+
         return $this;
     }
 
@@ -182,10 +197,8 @@ abstract class AbstractHydrator implements HydratorInterface
 
 
 
-    protected function groupForExtraction(array $data)
+    protected function groupForExtraction(array $properties)
     {
-        $collection = clone $this->propertyCollection; 
-
         // @TODO: Use ieu\Types\Arr -> $groups = $this->groups->filter('AbstractHydrator::GROUP_EXTRACTION & $v->getType()');
         $groups = array_filter($this->groups, function($group)  {
             return Group::EXTRACTION & $group->getType();
@@ -193,46 +206,47 @@ abstract class AbstractHydrator implements HydratorInterface
 
         // Nothing to group
         if (empty($groups)) {
-            return $data;
+            return $properties;
         }
 
+        $collections = [];
+
         foreach($groups as $groupName => $group) {
-            $collection->setName($groupName);
 
-            $dataGroup = $dataRest = [];
+            $dataGroup = [];
 
-            foreach ($data as $globalName => $value) {
+            foreach ($properties as $propertyName => $value) {
                 
-                if ($group->hasGlobalName($globalName)) {
-                    $dataGroup[$group->getLocalName($globalName)] = $value;
-                }
-                else {
-                    $dataRest[$globalName] = $value;
+                if ($group->hasGlobalName($propertyName)) {
+                    $dataGroup[$group->getLocalName($propertyName)] = $value;
+                    unset($properties[$propertyName]);
                 }
             }
 
-            // Set new $propertyName => $value array 
-            $collection->exchangeArray($dataGroup);
-            
-            $data = $dataRest;
-            $data[$groupName] = $collection;
+            if (!empty($dataGroup)) {
+                $collection = clone $this->propertyCollection; 
+                $collection->setName($groupName);
+                $collection->exchangeArray($dataGroup);
+                $collections[$groupName] = $collection;
+            }            
         }
 
-        return $data;  
+        return $properties + $collections;  
     }
 
     /**
-     * $data will be something like ['created_at_time_stamp' => 123, 'created_at_time_zone' => 'Western/Berlin']
+     * Incoming $columns will be something like ['created_at_time_stamp' => 123, 'created_at_time_zone' => 'Western/Berlin', 'some_string' => 'Test String']
+     * Outcoming $columns then would be ['created_at' => ColumnCollection(...), 'some_string' => 'Test String']
      *
-     * @param  array  $data [description]
+     * @param  array  $columns
+     *   The data coming from the database
      *
-     * @return [type]       [description]
+     * @return array
+     *   The new data array with native values und grouped values
      */
     
-    protected function groupForHydration(array $data)
+    protected function groupForHydration(array $columns)
     {
-        $collection = clone $this->columnCollection; 
-
         // @TODO: Use ieu\Types\Arr -> $groups = $this->groups->filter('AbstractHydrator::GROUP_EXTRACTION & $v->getType()');
         $groups = array_filter($this->groups, function($group)  {
             return Group::HYDRATION & $group->getType();
@@ -240,33 +254,39 @@ abstract class AbstractHydrator implements HydratorInterface
 
         // Nothing to group
         if (empty($groups)) {
-            return $data;
+            return $columns;
         }
 
+        // Stores data that has been grouped to CollumnCollections.
+        $collections = [];
+
+        // Loop over all groups
         foreach($groups as $groupName => $group) {
-            $collection->setName($groupName);
-
-            $dataGroup = $dataRest = [];
-
-            foreach ($data as $columnName => $value) {
+            $dataGroup =  [];
+            // Loop over all (remaining) columns
+            foreach ($columns as $columnName => $value) {
                 $globalPropertyName = $this->namingStrategy->getNameForHydration($columnName);
 
                 if ($group->hasGlobalName($globalPropertyName)) {
                     $dataGroup[$group->getLocalName($globalPropertyName)] = $value;
-                }
-                else {
-                    $dataRest[$columnName] = $value;
+                    unset($columns[$columnName]);
                 }
             }
 
-            // Set new $propertyName => $value array 
-            $collection->exchangeArray($dataGroup);
-            
-            $data = $dataRest;
-            $columnGroupName = $this->namingStrategy->getNameForExtraction($groupName);
-            $data[$columnGroupName] = $collection;
+            // Some columns have been grouped
+            if (!empty($dataGroup)) {
+                // Clone a new collection from the default one
+                $collection = clone $this->columnCollection; 
+                // Set name and data array of the collection
+                $collection->setName($groupName);
+                $collection->exchangeArray($dataGroup);
+                // Store the collection
+                $columnGroupName = $this->namingStrategy->getNameForExtraction($groupName);
+                $collections[$columnGroupName] = $collection;
+            }
         }
 
-        return $data; 
+        // Combine ungrouped data with the grouped
+        return $columns + $collections; 
     }
 }

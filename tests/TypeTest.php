@@ -6,6 +6,7 @@ use ieu\Hydrator\Types\ArrayType;
 use ieu\Hydrator\Types\IntegerType;
 use ieu\Hydrator\Types\DateTimeType;
 use ieu\Hydrator\Types\ClosureType;
+use ieu\Hydrator\Types\DateTimeZoneType;
 
 require_once __DIR__ . DIRECTORY_SEPARATOR . 'fixtures' . DIRECTORY_SEPARATOR . 'EntityType.php';
 
@@ -47,6 +48,16 @@ class TypeTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(null, $data['type']);
 
 		unset($object);
+	}
+
+	public function testDateTimeZoneType()
+	{
+		$object = (object)['date' => new DateTime()];
+		$this->hydrator->setType('date', DateTimeZoneType::instance());
+
+		// Hydration
+		$this->hydrator->hydrate($object, ['date_time_stamp' => 1, 'date_time_zone' => 'Europe/Kiev']);
+		
 	}
 
 	public function testArrayType()

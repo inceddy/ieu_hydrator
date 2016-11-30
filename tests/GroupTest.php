@@ -5,6 +5,7 @@ use ieu\Hydrator\NamingStrategies\UnderscoreNamingStrategy;
 use ieu\Hydrator\Types\ArrayType;
 use ieu\Hydrator\Types\IntegerType;
 use ieu\Hydrator\Types\ClosureType;
+use ieu\Hydrator\Types\EntityType;
 use ieu\Hydrator\Collections\ColumnCollection;
 use ieu\Hydrator\Collections\PropertyCollection;
 use ieu\Hydrator\Group;
@@ -45,5 +46,26 @@ class GroupTest extends \PHPUnit_Framework_TestCase {
 
 		$this->assertEquals(200,   $data['price_combined']->valueAmount);
 		$this->assertEquals('EUR', $data['price_combined']->currency);
+	}
+
+	public function testExtrationOfID()
+	{
+		$user = new Entity(200);
+		$customer = new Entity(100);
+
+		$object = (object)['user' => $user, 'customer' => $customer];
+
+		//var_dump(Entity::CLASS);
+
+		$hydrator = (new ClosureHydrator)
+			->setType('user', new EntityType(Entity::CLASS))
+			->setType('customer', new EntityType(Entity::CLASS))
+			->setGroup('user', ['.id'], Group::HYDRATION)
+			->setGroup('customer', ['.id'], Group::HYDRATION);
+
+
+		var_dump($hydrator->extract($object));
+		var_dump($hydrator->hydrate($object, ['user_id' => 1, 'customer_id' => 2]));
+
 	}
 }
